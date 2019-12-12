@@ -4,7 +4,7 @@ Variables Configuration
 
 variable "project" {
   description = "The name of the project."
-  default     = "distributed_nlp_emails"
+  default     = "distributed-nlp-emails"
 }
 
 variable "region" {
