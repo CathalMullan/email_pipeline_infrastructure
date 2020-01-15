@@ -3,6 +3,10 @@ hook:
 	pre-commit autoupdate
 	pre-commit install
 
+.PHONY: lint
+lint:
+	pre-commit run --all-files
+
 .PHONY: validate
 validate:
-	pre-commit run --all-files | tee logs/lint.log
+	make lint

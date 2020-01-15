@@ -1,0 +1,20 @@
+dist: bionic
+language: python
+python:
+  - 3.7
+
+branches:
+  only: ["master"]
+
+before_install:
+  # Pre-commit
+  - pip install pre-commit
+
+  # Terraform
+  - sudo apt-get update
+  - sudo apt-get install wget unzip
+  - wget https://releases.hashicorp.com/terraform/0.12.18/terraform_0.12.18_linux_amd64.zip
+  - sudo unzip ./terraform_0.12.18_linux_amd64.zip -d /usr/local/bin/
+
+script:
+  - make validate
