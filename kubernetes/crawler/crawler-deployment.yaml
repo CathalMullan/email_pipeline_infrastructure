@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: crawler
+  labels:
+    app: crawler
+spec:
+  selector:
+    matchLabels:
+      app: crawler
+      tier: crawler
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: crawler
+        tier: crawler
+    spec:
+      imagePullSecrets:
+        - name: gcr-cred
+      containers:
+        - name: crawler
+          image: gcr.io/distributed-email-pipeline/crawler:latest
+          env:
+            - name: KAFKA_HOSTS
+              value: "
+                kafka-cluster-kafka-0.kafka-cluster-kafka-brokers.kafka.svc.cluster.local,
+                kafka-cluster-kafka-1.kafka-cluster-kafka-brokers.kafka.svc.cluster.local,
+                kafka-cluster-kafka-2.kafka-cluster-kafka-brokers.kafka.svc.cluster.local
+              "
+          resources:
+            requests:
+              cpu: 500m
+              memory: 500Mi

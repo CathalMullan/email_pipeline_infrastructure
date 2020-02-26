@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: generator
+  labels:
+    app: generator
+spec:
+  selector:
+    matchLabels:
+      app: generator
+      tier: generator
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: generator
+        tier: generator
+    spec:
+      imagePullSecrets:
+        - name: gcr-cred
+      containers:
+        - name: generator
+          image: gcr.io/distributed-email-pipeline/generator:latest
+          env:
+            - name: KAFKA_HOSTS
+              value: "kafka-cluster-kafka-bootstrap:9092"
+          resources:
+            requests:
+              cpu: 500m
+              memory: 500Mi

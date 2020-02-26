@@ -1,10 +1,8 @@
 dist: bionic
 language: python
+
 python:
   - 3.7
-
-branches:
-  only: ["master"]
 
 before_install:
   # Pre-commit
