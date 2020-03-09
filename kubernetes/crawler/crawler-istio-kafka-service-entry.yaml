@@ -1,0 +1,28 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: ServiceEntry
+metadata:
+  name: kafka
+  labels:
+    app: kafka
+spec:
+  hosts:
+    # Must be of form: ${service-name}.${namespace}.global
+    - kafka-service-0.kafka.global
+  # Treat remote cluster services as part of the service mesh as all clusters in the service mesh share the same root
+  # of trust.
+  location: MESH_INTERNAL
+  ports:
+    - name: kafka-0-port
+      number: 9092
+      protocol: TCP
+  resolution: DNS
+  addresses:
+    # This address need not be routable.
+    # Traffic for this IP will be captured by the sidecar and routed appropriately.
+    - 127.255.0.1
+  endpoints:
+    # Traffic from the sidecar will be routed to this address.
+    - address: ${KAFKA_GW}
+      ports:
+        # Do not change this port value - it refers to the Istio Envoy load balancer.
+        kafka-0-port: 15443

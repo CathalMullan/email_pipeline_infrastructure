@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Setup Terraform credentials
-PROJECT_ID="distributed-email-pipeline"
+export PROJECT_ID=$(gcloud info --format='value(config.project)')
 
 gcloud beta iam service-accounts create terraform \
     --description "Automated Deployment" \

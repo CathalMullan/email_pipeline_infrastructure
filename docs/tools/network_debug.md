@@ -17,14 +17,18 @@ Connect to it
 kubectl exec -it deployment/debug -- /bin/bash
 ```
 
-Install `telnet`, `dig`
+Install `telnet`, `dig`, `ping`
 
 ```
 apt-get -y update
-apt-get -y install telnet dnsutils
+apt-get -y install telnet dnsutils iputils-ping
 ```
 
 Attempt to ping the ip of another resource
+
+```
+ping ...
+```
 
 ```
 telnet ...

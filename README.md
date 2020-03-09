@@ -7,7 +7,7 @@ Follow the guides in `docs/` to create the infrastructure needed to manage the d
 Stateful storage of events from web crawlers.
 
 ## Crawlers & Generators
-Scrape the MARC mail archive for emails, publishing then into the a Kafka queue.
+Scrape the MARC mail archive for emails, publishing then into a Kafka queue.
 
 ## Spark Streaming
 Read from Kafka email queue, process files into a Parquet structure stored in a GCP bucket.

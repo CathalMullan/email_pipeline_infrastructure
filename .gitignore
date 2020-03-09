@@ -1,6 +1,5 @@
 ## Custom ##
-!logs/.gitkeep
-logs/*
+istio-*/
 
 ## Auto Generated ##
 # Created by https://www.gitignore.io/api/terraform,intellij+all

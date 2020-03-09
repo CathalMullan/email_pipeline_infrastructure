@@ -2,10 +2,14 @@
 Distributed Email Pipeline Output
 */
 
-output "distributed-email-pipeline_cluster" {
-  value = var.distributed_email_pipeline_cluster
+output "kafka-cluster-name" {
+  value = google_container_cluster.kafka-cluster.name
+}
+
+output "crawler-generator-cluster-name" {
+  value = google_container_cluster.crawler-generator-cluster.name
 }
 
 output "distributed-email-pipeline_zone" {
-  value = var.distributed_email_pipeline_zone
+  value = var.project_zone
 }

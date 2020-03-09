@@ -3,7 +3,8 @@ Distributed Email Pipeline Provider
 */
 
 provider "google-beta" {
-  credentials = file(var.distributed_email_pipeline_service_account)
-  project     = "distributed-email-pipeline"
-  region      = var.distributed_email_pipeline_region
+  version     = "3.9.0"
+  credentials = file(var.project_service_account)
+  project     = var.project_id
+  region      = var.project_region
 }

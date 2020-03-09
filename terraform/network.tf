@@ -2,8 +2,16 @@
 Distributed Email Pipeline Network
 */
 
-resource "google_compute_network" "distributed-email-pipeline-network" {
+// Shared VPC used by all clusters.
+resource "google_compute_network" "project-network" {
   provider = google-beta
-  project  = "distributed-email-pipeline"
-  name     = "distributed-email-pipeline-network"
+  project  = var.project_id
+  name     = "project-network"
+
+  // Delete GCP created firewalls.
+  // TODO: Consider using Terraform to create firewalls.
+  provisioner "local-exec" {
+    when    = destroy
+    command = "./provisioners/delete_network_firewalls.sh"
+  }
 }

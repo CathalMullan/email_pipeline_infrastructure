@@ -23,11 +23,7 @@ spec:
           image: gcr.io/distributed-email-pipeline/crawler:latest
           env:
             - name: KAFKA_HOSTS
-              value: "
-                kafka-cluster-kafka-0.kafka-cluster-kafka-brokers.kafka.svc.cluster.local,
-                kafka-cluster-kafka-1.kafka-cluster-kafka-brokers.kafka.svc.cluster.local,
-                kafka-cluster-kafka-2.kafka-cluster-kafka-brokers.kafka.svc.cluster.local
-              "
+              value: "kafka-service-0.kafka.global"
           resources:
             requests:
               cpu: 500m
