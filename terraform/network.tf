@@ -14,4 +14,10 @@ resource "google_compute_network" "project-network" {
     when    = destroy
     command = "./provisioners/delete_network_firewalls.sh"
   }
+
+  // Delete GCP created forwarding rules.
+  provisioner "local-exec" {
+    when    = destroy
+    command = "./provisioners/delete_network_forwarding_rules.sh"
+  }
 }
