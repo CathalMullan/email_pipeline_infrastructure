@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# TODO: Move to using Python? Complexity is getting a little too much for Bash.
+# TODO: Move to using Python/Go? Complexity is getting a little too much for Bash.
 
 # cd to project root
 cd "$(dirname "${0}")" || exit
@@ -65,7 +65,8 @@ cd ../
 
 # Setup KubeDNS on clusters
 configure_dns () {
-    export GLOBAL_DOMAINS=$(kubectl get svc -n istio-system istiocoredns -o jsonpath='{.spec.clusterIP}')
+    export GLOBAL_DNS=$(kubectl get svc -n istio-system istiocoredns -o jsonpath='{.spec.clusterIP}')
+    echo "Global DNS: ${GLOBAL_DNS}"
     kubectl apply -f - <<EOF
 apiVersion: v1
 kind: ConfigMap
@@ -74,7 +75,7 @@ metadata:
   namespace: kube-system
 data:
   stubDomains: |
-    {"global": ["${GLOBAL_DOMAINS}"]}
+    {"global": ["${GLOBAL_DNS}"]}
 EOF
 }
 

@@ -9,7 +9,6 @@ resource "google_compute_network" "project-network" {
   name     = "project-network"
 
   // Delete GCP created firewalls.
-  // TODO: Consider using Terraform to create firewalls.
   provisioner "local-exec" {
     when    = destroy
     command = "./provisioners/delete_network_firewalls.sh"
@@ -19,5 +18,17 @@ resource "google_compute_network" "project-network" {
   provisioner "local-exec" {
     when    = destroy
     command = "./provisioners/delete_network_forwarding_rules.sh"
+  }
+
+  // Delete GCP created target pools.
+  provisioner "local-exec" {
+    when    = destroy
+    command = "./provisioners/delete_network_target_pools.sh"
+  }
+
+  // Delete GCP created health checks.
+  provisioner "local-exec" {
+    when    = destroy
+    command = "./provisioners/delete_network_health_checks.sh"
   }
 }

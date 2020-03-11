@@ -23,15 +23,20 @@ kubectl get statefulsets.apps,pod,deployments,svc
 # Create the Kafka topic 'email'.
 kubectl apply -f kubernetes/kafka/kafka-topic.yaml
 
-# Create services for Kafka instances
-kubectl apply -f kubernetes/kafka/kafka-service.yaml
-
 # Setup Credentials
 kubectl create secret docker-registry gcr-cred \
     --docker-server=https://gcr.io \
     --docker-username=_json_key \
     --docker-password="$(cat ~/.config/gcloud/gcp_service_account.json)" \
     --docker-email="terraform@${PROJECT_ID}.iam.gserviceaccount.com"
+
+# Setup LoadBalancer information
+export KAFKA_IP_0=$(kubectl get service kafka-cluster-kafka-0 -o=jsonpath='{.status.loadBalancer.ingress[0].ip}')
+export KAFKA_IP_1=$(kubectl get service kafka-cluster-kafka-1 -o=jsonpath='{.status.loadBalancer.ingress[0].ip}')
+export KAFKA_IP_2=$(kubectl get service kafka-cluster-kafka-2 -o=jsonpath='{.status.loadBalancer.ingress[0].ip}')
+
+export KAFKA_HOST="$KAFKA_IP_0:9094, $KAFKA_IP_1:9094, $KAFKA_IP_2:9094"
+echo "Kafka Host(s): $KAFKA_HOST"
 
 # Finish
 echo "Finished deploying Kafka stack."
