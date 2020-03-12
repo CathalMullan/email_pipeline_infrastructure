@@ -23,7 +23,7 @@ spec:
           image: gcr.io/distributed-email-pipeline/generator:latest
           env:
             - name: KAFKA_HOST
-              value: ${KAFKA_HOST}
+              value: "${KAFKA_HOST}"
           resources:
             requests:
               cpu: 500m

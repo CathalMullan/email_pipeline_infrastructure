@@ -10,6 +10,10 @@ output "crawler-generator-cluster-name" {
   value = google_container_cluster.crawler-generator-cluster.name
 }
 
+output "streaming-cluster-name" {
+  value = google_container_cluster.streaming-cluster.name
+}
+
 output "distributed-email-pipeline_zone" {
   value = var.project_zone
 }
