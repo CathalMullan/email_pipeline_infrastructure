@@ -13,10 +13,9 @@ export KAFKA_IP_1=$(kubectl get service kafka-cluster-kafka-1 -o=jsonpath='{.sta
 export KAFKA_IP_2=$(kubectl get service kafka-cluster-kafka-2 -o=jsonpath='{.status.loadBalancer.ingress[0].ip}')
 export KAFKA_HOST="$KAFKA_IP_0:9094, $KAFKA_IP_1:9094, $KAFKA_IP_2:9094"
 
-# Create namespace and inject Istio.
+# Create namespace.
 kubectl config use-context crawler_generator
 kubectl create namespace crawler
-kubectl label namespace crawler istio-injection=enabled
 kubectl config set-context --current --namespace crawler
 
 # Deploy crawler.

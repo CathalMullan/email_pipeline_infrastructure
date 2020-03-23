@@ -6,20 +6,20 @@ cd ../
 
 export PROJECT_ID=$(gcloud info --format='value(config.project)')
 
-# Create namespace and inject Istio.
+# Create namespace.
 kubectl config use-context kafka
 kubectl create namespace kafka
-kubectl label namespace kafka istio-injection=enabled
 kubectl config set-context --current --namespace kafka
 
 # Install Strimzi operator.
 curl -L https://github.com/strimzi/strimzi-kafka-operator/releases/download/0.15.0/strimzi-cluster-operator-0.15.0.yaml \
   | sed 's/namespace: .*/namespace: kafka/' \
   | kubectl apply -f - -n kafka
+sleep 5
 
 # Provision the Apache Kafka cluster.
 kubectl apply -f kubernetes/kafka/kafka-cluster.yaml
-kubectl wait kafka/kafka-cluster --for=condition=Ready --timeout=600s
+kubectl wait kafka/kafka-cluster --for=condition=Ready --timeout=900s
 kubectl get statefulsets.apps,pod,deployments,svc
 
 # Create the Kafka topic 'email'.

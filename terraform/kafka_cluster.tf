@@ -26,12 +26,11 @@ resource "google_container_node_pool" "kafka-cluster-nodes" {
   project    = var.project_id
   location   = var.project_zone
   cluster    = google_container_cluster.kafka-cluster.name
-  node_count = 2
+  node_count = 1
 
   // For Kafka, we need consistent, stable instanes with high memory.
   node_config {
-    // TODO: Switch to 'false' - Kafka must run continously.
-    preemptible     = true
+    preemptible     = false
     machine_type    = "n1-standard-2"
     service_account = var.project_service_account_email
 
@@ -39,7 +38,8 @@ resource "google_container_node_pool" "kafka-cluster-nodes" {
     // https://cloud.google.com/kubernetes-engine/docs/concepts/node-images#containerd_node_images
     image_type = "COS"
 
-    // Kafka will have the greatest scopes access, as it was effectively act as the entrypoint to the cluster resources.
+    // Kafka will have the greatest scopes access, as it will effectively act as the entrypoint to the cluster
+    // resources.
     oauth_scopes = [
       "https://www.googleapis.com/auth/compute",
       "https://www.googleapis.com/auth/devstorage.read_only",
@@ -52,7 +52,7 @@ resource "google_container_node_pool" "kafka-cluster-nodes" {
   }
 
   autoscaling {
-    min_node_count = 2
+    min_node_count = 1
     max_node_count = 8
   }
 }

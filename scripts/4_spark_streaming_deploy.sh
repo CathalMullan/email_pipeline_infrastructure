@@ -13,10 +13,9 @@ export KAFKA_IP_1=$(kubectl get service kafka-cluster-kafka-1 -o=jsonpath='{.sta
 export KAFKA_IP_2=$(kubectl get service kafka-cluster-kafka-2 -o=jsonpath='{.status.loadBalancer.ingress[0].ip}')
 export KAFKA_HOST="$KAFKA_IP_0:9094, $KAFKA_IP_1:9094, $KAFKA_IP_2:9094"
 
-# Create namespace and inject Istio.
+# Create namespace.
 kubectl config use-context streaming
 kubectl create namespace streaming
-kubectl label namespace streaming istio-injection=enabled
 kubectl config set-context --current --namespace streaming
 
 # Create Kafka host secret (required by Spark).
@@ -26,25 +25,17 @@ envsubst < kubernetes/streaming/kafka-secret.yaml | kubectl apply -f -
 # Deploy Spark streaming cluster setup
 kubectl apply -f kubernetes/streaming/streaming_service_account.yaml
 kubectl apply -f kubernetes/streaming/streaming_cluster_role_binding.yaml
+kubectl create secret generic service-account --from-file=/Users/cmullan/.config/gcloud/gcp_service_account.json
 
-# Proxy and start job
-kubectl proxy &
-PROXY_PID=$!
+# Use Spark-on-K8s-operator
+helm repo add incubator http://storage.googleapis.com/kubernetes-charts-incubator
 
-sleep 10
-timeout 120 /opt/spark/bin/spark-submit \
-    --master k8s://http://127.0.0.1:8001 \
-    --deploy-mode cluster \
-    --name email_stream_processor \
-    --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.0.0-preview2 \
-    --conf spark.executor.instances=2 \
-    --conf spark.dynamicAllocation.maxExecutors=8 \
-    --conf spark.kubernetes.authenticate.driver.serviceAccountName=streaming \
-    --conf spark.kubernetes.container.image=gcr.io/distributed-email-pipeline/email_stream_processor:latest \
-    --conf spark.kubernetes.namespace=streaming \
-    --conf spark.kubernetes.driver.secretKeyRef.KAFKA_HOSTS=kafka-secret:hosts \
-    --conf spark.kubernetes.executor.secretKeyRef.KAFKA_HOSTS=kafka-secret:hosts \
-    --conf spark.streaming.backpressure.enabled=true \
-    /app/src/email_stream_processor/jobs/stream_pipeline.py
+kubectl create namespace spark-operator
+helm install incubator/sparkoperator \
+    --generate-name \
+    --namespace spark-operator \
+    --set sparkJobNamespace=streaming \
+    --wait
 
-kill ${PROXY_PID}
+kubectl apply -f kubernetes/streaming/streaming_job.yaml
+kubectl get sparkapplications

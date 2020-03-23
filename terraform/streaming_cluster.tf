@@ -21,13 +21,12 @@ resource "google_container_cluster" "streaming-cluster" {
   ]
 }
 
-// TODO: Evaluate whether Istio requires a seperate (stable) node pool.
 resource "google_container_node_pool" "streaming-cluster-nodes" {
   name       = "streaming-nodes"
   project    = var.project_id
   location   = var.project_zone
   cluster    = google_container_cluster.streaming-cluster.name
-  node_count = 2
+  node_count = 1
 
   // For the Spark Streaming nodes, we can use small, preemptable instances.
   node_config {
@@ -53,7 +52,7 @@ resource "google_container_node_pool" "streaming-cluster-nodes" {
 
   // Autoscale as required to manage Kafka queue consumption.
   autoscaling {
-    min_node_count = 2
+    min_node_count = 1
     max_node_count = 8
   }
 }
