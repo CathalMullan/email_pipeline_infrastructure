@@ -1,9 +1,9 @@
 /*
-Crawler/Genetator Kubernetes Cluster
+Tensorflow Kubernetes Cluster
 */
 
-resource "google_container_cluster" "crawler-generator-cluster" {
-  name     = "crawler-generator-cluster"
+resource "google_container_cluster" "tensorflow-cluster" {
+  name     = "tensorflow-cluster"
   project  = var.project_id
   location = var.project_zone
   network  = google_compute_network.project-network.self_link
@@ -21,24 +21,28 @@ resource "google_container_cluster" "crawler-generator-cluster" {
   ]
 }
 
-resource "google_container_node_pool" "crawler-generator-cluster-nodes" {
-  name       = "crawler-generator-nodes"
+resource "google_container_node_pool" "tensorflow-cluster-nodes" {
+  name       = "tensorflow-nodes"
   project    = var.project_id
   location   = var.project_zone
-  cluster    = google_container_cluster.crawler-generator-cluster.name
-  node_count = 1
+  cluster    = google_container_cluster.tensorflow-cluster.name
+  node_count = 0
 
-  // For the Crawlers/Generators, we can use small, preemptable instances.
+  // For the Tensorflow nodes, we can GPUs.
   node_config {
     preemptible     = true
-    machine_type    = "n1-standard-1"
+    machine_type    = "n1-standard-2"
     service_account = var.project_service_account_email
+
+    guest_accelerator {
+      type  = "nvidia-tesla-t4"
+      count = 1
+    }
 
     // Use containerd.
     // https://cloud.google.com/kubernetes-engine/docs/concepts/node-images#containerd_node_images
     image_type = "COS"
 
-    // TODO: Evaluate required scopes - unlikely to need currently elavated priveldge.
     oauth_scopes = [
       "https://www.googleapis.com/auth/compute",
       "https://www.googleapis.com/auth/devstorage.read_only",

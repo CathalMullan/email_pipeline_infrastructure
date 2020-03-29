@@ -53,6 +53,6 @@ resource "google_container_node_pool" "kafka-cluster-nodes" {
 
   autoscaling {
     min_node_count = 1
-    max_node_count = 8
+    max_node_count = 4
   }
 }

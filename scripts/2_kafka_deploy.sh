@@ -12,15 +12,17 @@ kubectl create namespace kafka
 kubectl config set-context --current --namespace kafka
 
 # Install Strimzi operator.
-curl -L https://github.com/strimzi/strimzi-kafka-operator/releases/download/0.15.0/strimzi-cluster-operator-0.15.0.yaml \
-  | sed 's/namespace: .*/namespace: kafka/' \
-  | kubectl apply -f - -n kafka
-sleep 5
+helm repo add strimzi https://strimzi.io/charts/
+helm repo update
+helm install strimzi/strimzi-kafka-operator \
+    --generate-name \
+    --namespace kafka \
+    --version 0.15.0 \
+    --wait
 
 # Provision the Apache Kafka cluster.
 kubectl apply -f kubernetes/kafka/kafka-cluster.yaml
 kubectl wait kafka/kafka-cluster --for=condition=Ready --timeout=900s
-kubectl get statefulsets.apps,pod,deployments,svc
 
 # Create the Kafka topic 'email'.
 kubectl apply -f kubernetes/kafka/kafka-topic.yaml
@@ -33,4 +35,4 @@ kubectl create secret docker-registry gcr-cred \
     --docker-email="terraform@${PROJECT_ID}.iam.gserviceaccount.com"
 
 # Finish
-echo "Finished deploying Kafka stack."
+echo "Finished deploying Kafka stack, ready to receive events."
