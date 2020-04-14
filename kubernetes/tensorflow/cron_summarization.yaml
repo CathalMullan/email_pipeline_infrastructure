@@ -1,0 +1,28 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: summarization-cron
+  namespace: mpi-operator
+spec:
+  schedule: "0 6 * * *"
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: mpi-operator
+          containers:
+            - name: summarization-cron
+              image: bitnami/kubectl:latest
+              command:
+                - /bin/sh
+                - -c
+                - kubectl apply -f /etc/jobs/summarization_job.yaml && kubectl wait --for=condition=complete --timeout=10800s job/summarization-launcher && kubectl delete mpijobs.kubeflow.org summarization
+              volumeMounts:
+                - name: job
+                  mountPath: /etc/jobs
+          restartPolicy: Never
+          volumes:
+            - name: job
+              secret:
+                secretName: summarization-job

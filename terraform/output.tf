@@ -18,6 +18,10 @@ output "tensorflow-cluster-name" {
   value = google_container_cluster.tensorflow-cluster.name
 }
 
+output "api-cluster-name" {
+  value = google_container_cluster.api-cluster.name
+}
+
 output "distributed-email-pipeline_zone" {
   value = var.project_zone
 }

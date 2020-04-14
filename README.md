@@ -1,5 +1,6 @@
 # Email Pipeline Infrastructure
-Follow the guides in `docs/` to create the infrastructure needed to manage the distributed email pipeline.
+Follow the guides in `docs/` to create the infrastructure needed to manage the distributed email pipeline, then run
+`scripts/X_stack_create.sh`.
 
 # Components
 
@@ -15,5 +16,5 @@ Read from Kafka email queue, process files into a Parquet structure stored in a 
 ## Spark TensorFlow
 Read from GCP Parquet bucket, perform training on files. Saved models in individual GCP buckets.
 
-## Frontend
-PWA Email client deployed as a service. pulling saved models from GCP buckets.
+## API
+API client deployed as a service. pulling saved models from GCP buckets.

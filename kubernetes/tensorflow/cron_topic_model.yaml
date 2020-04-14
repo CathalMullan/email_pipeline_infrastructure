@@ -1,0 +1,28 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: topic-model-cron
+  namespace: mpi-operator
+spec:
+  schedule: "0 3 * * *"
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: mpi-operator
+          containers:
+            - name: topic-model-cron
+              image: bitnami/kubectl:latest
+              command:
+                - /bin/sh
+                - -c
+                - kubectl apply -f /etc/jobs/topic_model_job.yaml && kubectl wait --for=condition=complete --timeout=10800s job/topic-model-launcher && kubectl delete mpijobs.kubeflow.org topic-model
+              volumeMounts:
+                - name: job
+                  mountPath: /etc/jobs
+          restartPolicy: Never
+          volumes:
+            - name: job
+              secret:
+                secretName: topic-model-job

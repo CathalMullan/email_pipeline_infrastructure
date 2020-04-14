@@ -21,11 +21,11 @@ helm install strimzi/strimzi-kafka-operator \
     --wait
 
 # Provision the Apache Kafka cluster.
-kubectl apply -f kubernetes/kafka/kafka-cluster.yaml
+kubectl apply -f kubernetes/kafka/kafka_cluster.yaml
 kubectl wait kafka/kafka-cluster --for=condition=Ready --timeout=900s
 
 # Create the Kafka topic 'email'.
-kubectl apply -f kubernetes/kafka/kafka-topic.yaml
+kubectl apply -f kubernetes/kafka/kafka_topic.yaml
 
 # Setup Credentials
 kubectl create secret docker-registry gcr-cred \

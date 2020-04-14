@@ -1,12 +1,15 @@
 /*
-Crawler/Genetator Kubernetes Cluster
+Api Kubernetes Cluster
 */
 
-resource "google_container_cluster" "crawler-generator-cluster" {
-  name     = "crawler-generator-cluster"
+resource "google_container_cluster" "api-cluster" {
+  name     = "api-cluster"
   project  = var.project_id
   location = var.project_zone
   network  = google_compute_network.project-network.self_link
+
+  // GPU support requires the latest version.
+  min_master_version = "latest"
 
   // Disable monitoring and logging to save costs
   logging_service    = "none"
@@ -21,16 +24,15 @@ resource "google_container_cluster" "crawler-generator-cluster" {
   ]
 }
 
-resource "google_container_node_pool" "crawler-generator-cluster-nodes" {
-  name       = "crawler-generator-nodes"
+resource "google_container_node_pool" "api-cluster-nodes" {
+  name       = "api-nodes"
   project    = var.project_id
   location   = var.project_zone
-  cluster    = google_container_cluster.crawler-generator-cluster.name
+  cluster    = google_container_cluster.api-cluster.name
   node_count = 1
 
-  // For the Crawlers/Generators, we can use small, long-running instances.
   node_config {
-    preemptible     = false
+    preemptible     = true
     machine_type    = "n1-standard-1"
     service_account = var.project_service_account_email
 

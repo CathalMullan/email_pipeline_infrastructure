@@ -26,22 +26,21 @@ resource "google_container_node_pool" "streaming-cluster-nodes" {
   project    = var.project_id
   location   = var.project_zone
   cluster    = google_container_cluster.streaming-cluster.name
-  node_count = 1
+  node_count = 2
 
   // For the Spark Streaming nodes, we can use small, preemptable instances.
   node_config {
     preemptible     = true
-    machine_type    = "n1-standard-2"
+    machine_type    = "n1-highmem-2"
     service_account = var.project_service_account_email
 
     // Use containerd.
     // https://cloud.google.com/kubernetes-engine/docs/concepts/node-images#containerd_node_images
     image_type = "COS"
 
-    // TODO: Evaluate required scopes - unlikely to need currently elavated priveldge.
     oauth_scopes = [
       "https://www.googleapis.com/auth/compute",
-      "https://www.googleapis.com/auth/devstorage.read_only",
+      "https://www.googleapis.com/auth/devstorage.read_write",
       "https://www.googleapis.com/auth/logging.write",
       "https://www.googleapis.com/auth/monitoring",
       "https://www.googleapis.com/auth/servicecontrol",
@@ -50,9 +49,23 @@ resource "google_container_node_pool" "streaming-cluster-nodes" {
     ]
   }
 
+  // Prevents resizing when applying new changes.
+  lifecycle {
+    ignore_changes = [
+      initial_node_count,
+      node_count
+    ]
+  }
+
+  // Try to survive.
+  management {
+    auto_repair  = "true"
+    auto_upgrade = "true"
+  }
+
   // Autoscale as required to manage Kafka queue consumption.
   autoscaling {
     min_node_count = 1
-    max_node_count = 4
+    max_node_count = 8
   }
 }

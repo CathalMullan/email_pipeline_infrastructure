@@ -10,8 +10,7 @@ kubectl config set-context --current --namespace kafka
 
 export KAFKA_IP_0=$(kubectl get service kafka-cluster-kafka-0 -o=jsonpath='{.status.loadBalancer.ingress[0].ip}')
 export KAFKA_IP_1=$(kubectl get service kafka-cluster-kafka-1 -o=jsonpath='{.status.loadBalancer.ingress[0].ip}')
-export KAFKA_IP_2=$(kubectl get service kafka-cluster-kafka-2 -o=jsonpath='{.status.loadBalancer.ingress[0].ip}')
-export KAFKA_HOST="$KAFKA_IP_0:9094, $KAFKA_IP_1:9094, $KAFKA_IP_2:9094"
+export KAFKA_HOST="$KAFKA_IP_0:9094, $KAFKA_IP_1:9094"
 
 # Create namespace.
 kubectl config use-context streaming
@@ -21,7 +20,7 @@ kubectl config set-context --current --namespace streaming
 
 # Create Kafka host secret (required by Spark).
 export BASE64_KAFKA_HOST=$(echo -n "${KAFKA_HOST}" | base64)
-envsubst < kubernetes/streaming/kafka-secret.yaml | kubectl apply -f -
+envsubst < kubernetes/streaming/kafka_secret.yaml | kubectl apply -f -
 
 # Deploy Spark streaming cluster setup
 kubectl apply -f kubernetes/streaming/streaming_service_account.yaml
@@ -31,12 +30,14 @@ kubectl create secret generic service-account --from-file=/Users/cmullan/.config
 # Install Spark-on-K8s operator.
 helm repo add incubator http://storage.googleapis.com/kubernetes-charts-incubator
 helm repo update
-helm install incubator/sparkoperator \
-    --generate-name \
+helm install streaming incubator/sparkoperator \
     --namespace spark-operator \
     --set sparkJobNamespace=streaming \
+    --set enableMetrics=false \
     --wait
 
+# Start/schedule job.
 kubectl apply -f kubernetes/streaming/streaming_job.yaml
+kubectl apply -f kubernetes/streaming/cron_pre_topic_model.yaml
 
 echo "Finished deploying Streaming, now consuming Kafka events and storing in GCS."

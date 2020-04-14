@@ -1,0 +1,80 @@
+apiVersion: kubeflow.org/v1alpha2
+kind: MPIJob
+metadata:
+  name: summarization
+  namespace: mpi-operator
+spec:
+  schedule: "0 6 * * *"
+  slotsPerWorker: 1
+  cleanPodPolicy: Running
+  mpiReplicaSpecs:
+    Launcher:
+      replicas: 1
+      template:
+        spec:
+          containers:
+            - image: gcr.io/distributed-email-pipeline/spark_tensorflow_pipeline:latest
+              name: summarization
+              volumeMounts:
+                - name: service-account-volume
+                  mountPath: "/etc/secrets"
+                  readOnly: true
+              env:
+                - name: BUCKET_PARQUET
+                  value: gs://distributed-email-pipeline-parquet/email_parquet/
+                - name: BUCKET_SUMMARIZATION_MODEL
+                  value: gs://distributed-email-pipeline-models/summarization_model/
+                - name: GOOGLE_APPLICATION_CREDENTIALS
+                  value: /etc/secrets/gcp_service_account.json
+              command:
+                - mpirun
+                - --allow-run-as-root
+                - -np
+                - "2"
+                - -bind-to
+                - none
+                - -map-by
+                - slot
+                - -x
+                - NCCL_DEBUG=INFO
+                - -x
+                - LD_LIBRARY_PATH
+                - -x
+                - PATH
+                - -mca
+                - pml
+                - ob1
+                - -mca
+                - btl
+                - ^openib
+                - python
+                - /app/src/spark_tensorflow_pipeline/jobs/summarization/summarization_model.py
+          volumes:
+            - name: service-account-volume
+              secret:
+                secretName: service-account
+    Worker:
+      replicas: 2
+      template:
+        spec:
+          containers:
+            - image: gcr.io/distributed-email-pipeline/spark_tensorflow_pipeline:latest
+              name: summarization
+              volumeMounts:
+                - name: service-account-volume
+                  mountPath: "/etc/secrets"
+                  readOnly: true
+              env:
+                - name: BUCKET_PARQUET
+                  value: gs://distributed-email-pipeline-parquet/email_parquet/
+                - name: BUCKET_SUMMARIZATION_MODEL
+                  value: gs://distributed-email-pipeline-models/summarization_model/
+                - name: GOOGLE_APPLICATION_CREDENTIALS
+                  value: /etc/secrets/gcp_service_account.json
+              resources:
+                limits:
+                  nvidia.com/gpu: 1
+          volumes:
+            - name: service-account-volume
+              secret:
+                secretName: service-account

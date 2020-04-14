@@ -11,6 +11,7 @@ spec:
   imagePullPolicy: Always
   mainApplicationFile: /app/src/email_stream_processor/jobs/stream_pipeline.py
   sparkConf:
+      "spark.dynamicAllocation.maxExecutors": "8"
       "spark.kubernetes.authenticate.driver.serviceAccountName": "streaming"
       "spark.kubernetes.container.image": "gcr.io/distributed-email-pipeline/email_stream_processor:latest"
       "spark.kubernetes.namespace": "streaming"
@@ -32,20 +33,24 @@ spec:
   sparkVersion: "2.4.5"
   deps:
     jars:
-      - https://repo1.maven.org/maven2/org/apache/spark/spark-sql-kafka-0-10_2.11/2.4.5/spark-sql-kafka-0-10_2.11-2.4.5.jar
-      - https://repo1.maven.org/maven2/org/apache/kafka/kafka-clients/2.4.1/kafka-clients-2.4.1.jar
-      - https://repo1.maven.org/maven2/com/google/cloud/bigdataoss/gcs-connector/hadoop2-2.0.1/gcs-connector-hadoop2-2.0.1-shaded.jar
+      - local:///app/jars/spark-sql-kafka-0-10_2.11-2.4.5.jar
+      - local:///app/jars/kafka-clients-2.4.1.jar
+      - local:///app/jars/gcs-connector-hadoop2-2.0.1-shaded.jar
   restartPolicy:
-    type: OnFailure
+    type: Always
     onFailureRetries: 3
     onFailureRetryInterval: 10
     onSubmissionFailureRetries: 5
     onSubmissionFailureRetryInterval: 20
   driver:
+    coreRequest: "0.5"
+    memory: "2G"
     labels:
       version: 2.4.5
     serviceAccount: streaming
   executor:
     instances: 2
+    coreRequest: "0.5"
+    memory: "3G"
     labels:
       version: 2.4.5

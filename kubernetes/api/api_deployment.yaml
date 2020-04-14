@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api
+  labels:
+    app: api
+spec:
+  selector:
+    matchLabels:
+      app: api
+      tier: api
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: api
+        tier: api
+    spec:
+      imagePullSecrets:
+        - name: gcr-cred
+      containers:
+        - name: api
+          image: gcr.io/distributed-email-pipeline/crawler:latest
+          command:
+            - uvicorn
+            - spark_tensorflow_pipeline.serving.api:APP
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - name: service-account-volume
+              mountPath: "/etc/secrets"
+              readOnly: true
+          resources:
+            requests:
+              cpu: 100m
+              memory: 100Mi
+          env:
+            - name: BUCKET_PARQUET
+              value: gs://distributed-email-pipeline-parquet/email_parquet/
+            - name: BUCKET_TOPIC_MODEL
+              value: gs://distributed-email-pipeline-models/topic_model/checkpoint/
+            - name: BUCKET_SUMMARIZATION_MODEL
+              value: gs://distributed-email-pipeline-models/summarization_model/
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: /etc/secrets/gcp_service_account.json
+          ports:
+            - hostPort: 80
+              containerPort: 80
+      volumes:
+        - name: service-account-volume
+          secret:
+            secretName: service-account

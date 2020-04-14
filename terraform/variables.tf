@@ -14,7 +14,7 @@ variable "project_region" {
 
 variable "project_zone" {
   description = "Zone to create instances."
-  default     = "us-east1-c"
+  default     = "us-east1-b"
 }
 
 variable "project_service_account" {
